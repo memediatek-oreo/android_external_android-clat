@@ -49,7 +49,7 @@ void fill_ip6_header(struct ip6_hdr *ip6, uint16_t payload_len, uint8_t protocol
                      const struct iphdr *old_header);
 
 // Translate and send packets.
-void translate_packet(int fd, int to_ipv6, const uint8_t *packet, size_t packetsize);
+void translate_packet(int fd, int to_ipv6, const uint8_t *packet, size_t packetsize, __u32 tp_status);
 
 // Translate IPv4 and IPv6 packets.
 int ipv4_packet(clat_packet out, clat_packet_index pos, const uint8_t *packet, size_t len);

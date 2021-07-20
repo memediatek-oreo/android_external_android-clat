@@ -119,7 +119,7 @@ void ring_read(struct packet_ring *ring, int write_fd, int to_ipv6) {
   struct tpacket2_hdr *tp = ring->next;
   if (tp->tp_status & TP_STATUS_USER) {
     uint8_t *packet = ((uint8_t *) tp) + tp->tp_net;
-    translate_packet(write_fd, to_ipv6, packet, tp->tp_len);
+    translate_packet(write_fd, to_ipv6, packet, tp->tp_len, tp->tp_status);
     tp->tp_status = TP_STATUS_KERNEL;
     tp = ring_advance(ring);
   }

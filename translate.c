@@ -492,7 +492,7 @@ void send_rawv6(int fd, clat_packet out, int iov_len) {
  * packet     - packet
  * packetsize - size of packet
  */
-void translate_packet(int fd, int to_ipv6, const uint8_t *packet, size_t packetsize) {
+void translate_packet(int fd, int to_ipv6, const uint8_t *packet, size_t packetsize, __u32 tp_status) {
   int iov_len = 0;
 
   // Allocate buffers for all packet headers.
@@ -525,6 +525,14 @@ void translate_packet(int fd, int to_ipv6, const uint8_t *packet, size_t packets
     iov_len = ipv6_packet(out, CLAT_POS_IPHDR, packet, packetsize);
     if (iov_len > 0) {
       fill_tun_header(&tun_targ, ETH_P_IP);
+
+      //gro on: clatd checksum fail patch: not calculate nornal and GRO packet's checksum
+      if (tp_status & TP_STATUS_CSUM_VALID) {  //this is normal packet or GRO packet
+          tun_targ.flags = htons(0xF000); //0xF000 means packet no need do tcp checksum;
+          if (tp_status & TP_STATUS_CSUMNOTREADY)  //this is GRO packet
+              tun_targ.flags |= htons(0x0F00);
+      }
+
       out[CLAT_POS_TUNHDR].iov_len = sizeof(tun_targ);
       send_tun(fd, out, iov_len);
     }
